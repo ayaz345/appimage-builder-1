@@ -76,8 +76,9 @@ class AptRecipeGenerator:
     def _read_sources_list_file(path):
         sources = []
         with open(path, "r") as f:
-            for line in f.readlines():
-                if line.startswith("deb "):
-                    sources.append({"sourceline": line.strip()})
-
+            sources.extend(
+                {"sourceline": line.strip()}
+                for line in f
+                if line.startswith("deb ")
+            )
         return sources

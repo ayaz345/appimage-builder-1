@@ -66,10 +66,7 @@ class Deploy:
         required_packages = set(self.apt_venv.search_packages(include_patterns))
         excluded_packages = excluded_packages.difference(required_packages)
         self.apt_venv.set_installed_packages(excluded_packages)
-        # lists packages to be installed including dependencies
-        deploy_list = set(self.apt_venv.resolve_packages(include_patterns))
-
-        return deploy_list
+        return set(self.apt_venv.resolve_packages(include_patterns))
 
     def _extract_packages(self, appdir_root, packages):
         # ensure target directories exists
@@ -77,7 +74,7 @@ class Deploy:
         for package in packages:
             final_target = appdir_root
             self.logger.info(
-                "Deploying %s to %s" % (package.get_expected_file_name(), final_target)
+                f"Deploying {package.get_expected_file_name()} to {final_target}"
             )
             self.apt_venv.extract_package(package, final_target)
 
@@ -87,10 +84,11 @@ class Deploy:
         latest_packages = {}
         for package in apt_core_packages:
             pkg_tuple = (package.name, package.arch)
-            if pkg_tuple not in latest_packages:
+            if (
+                pkg_tuple in latest_packages
+                and package > latest_packages[pkg_tuple]
+                or pkg_tuple not in latest_packages
+            ):
                 latest_packages[pkg_tuple] = package
-            else:
-                if package > latest_packages[pkg_tuple]:
-                    latest_packages[pkg_tuple] = package
 
         return latest_packages.values()

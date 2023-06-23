@@ -51,14 +51,13 @@ class Qt(BaseHelper):
                 self._write_qt_conf(qt_conf, path)
 
     def _find_exec_dirs(self):
-        exec_dirs = self.finder.find_dirs_containing(
+        return self.finder.find_dirs_containing(
             file_checks=[Finder.is_file, Finder.is_executable]
         )
-        return exec_dirs
 
     def _write_qt6_conf(self, qt_conf: {str: str}, target_dir: Path):
         path = target_dir / "qt6.conf"
-        logging.info("Creating %s" % path.relative_to(self.app_dir))
+        logging.info(f"Creating {path.relative_to(self.app_dir)}")
         with path.open("w") as f:
             f.write("[Paths]\n")
             for k, v in qt_conf.items():
@@ -66,7 +65,7 @@ class Qt(BaseHelper):
 
     def _write_qt_conf(self, qt_conf: {str: str}, target_dir: Path):
         path = target_dir / "qt.conf"
-        logging.info("Creating %s" % path.relative_to(self.app_dir))
+        logging.info(f"Creating {path.relative_to(self.app_dir)}")
         with path.open("w") as f:
             f.write("[Paths]\n")
             for k, v in qt_conf.items():
@@ -80,10 +79,9 @@ class Qt(BaseHelper):
         return config
 
     def _locate_qt4_dirs(self):
-        libqt4core_path = self.finder.find_one(
+        if libqt4core_path := self.finder.find_one(
             "*/libQtCore.so.4.*", [Finder.is_file, Finder.is_elf_shared_lib]
-        )
-        if libqt4core_path:
+        ):
             self._qt4_dirs["Libraries"] = libqt4core_path.parent
         else:
             # don't go any forward if libQtCore.so.4.... is not found
@@ -100,73 +98,59 @@ class Qt(BaseHelper):
                 ],
             )
         )
-        qmake_path = paths[0]
-        if qmake_path:
+        if qmake_path := paths[0]:
             self._qt4_dirs["Binaries"] = qmake_path.parent
 
-        # just to find plugin directory, lookup a lib included in libqtcore4:<arch>
-        libqminimal_path = self.finder.find_one(
+        if libqminimal_path := self.finder.find_one(
             "*/libqjpcodecs.so", [Finder.is_file, Finder.is_elf]
-        )
-        if libqminimal_path:
+        ):
             self._qt4_dirs["Plugins"] = libqminimal_path.parent.parent
 
-        # ok
-        builtins_qmltypes_path = self.finder.find_one(
+        if builtins_qmltypes_path := self.finder.find_one(
             "*/builtins.qmltypes", [Finder.is_file]
-        )
-        if builtins_qmltypes_path:
+        ):
             self._qt4_dirs["Qml2Imports"] = builtins_qmltypes_path.parent
 
-        # ok
-        qtbase_translations_path = self.finder.find_one(
+        if qtbase_translations_path := self.finder.find_one(
             "*/qt4/translations", [Finder.is_dir]
-        )
-        if qtbase_translations_path:
+        ):
             self._qt4_dirs["Translations"] = qtbase_translations_path
 
     def _locate_qt5_dirs(self):
-        libqt5core_path = self.finder.find_one(
+        if libqt5core_path := self.finder.find_one(
             "*/libQt5Core.so.*", [Finder.is_file, Finder.is_elf_shared_lib]
-        )
-        if libqt5core_path:
+        ):
             self._qt5_dirs["Libraries"] = libqt5core_path.parent
         else:
             # don't go any forward if libQt5Core is not found
             return
 
-        qtwebengine_path = self.finder.find_one(
+        if qtwebengine_path := self.finder.find_one(
             "*/QtWebEngineProcess", [Finder.is_file, Finder.is_executable]
-        )
-        if qtwebengine_path:
+        ):
             self._qt5_dirs["LibraryExecutables"] = qtwebengine_path.parent
 
-        qmake_path = self.finder.find_one(
+        if qmake_path := self.finder.find_one(
             "*/qmake", [Finder.is_file, Finder.is_executable]
-        )
-        if qmake_path:
+        ):
             self._qt5_dirs["Binaries"] = qmake_path.parent
 
-        libqminimal_path = self.finder.find_one(
+        if libqminimal_path := self.finder.find_one(
             "*/libqminimal.so", [Finder.is_file, Finder.is_elf]
-        )
-        if libqminimal_path:
+        ):
             self._qt5_dirs["Plugins"] = libqminimal_path.parent.parent
 
-        builtins_qmltypes_path = self.finder.find_one(
+        if builtins_qmltypes_path := self.finder.find_one(
             "*/builtins.qmltypes", [Finder.is_file]
-        )
-        if builtins_qmltypes_path:
+        ):
             self._qt5_dirs["Qml2Imports"] = builtins_qmltypes_path.parent
 
-        qtbase_translations_path = self.finder.find_one(
+        if qtbase_translations_path := self.finder.find_one(
             "*/qt5/translations", [Finder.is_dir]
-        )
-        if qtbase_translations_path:
+        ):
             self._qt5_dirs["Translations"] = qtbase_translations_path
 
-        data_path = self.finder.find_one("*/qt5/resources", [Finder.is_dir])
-        if data_path:
+        if data_path := self.finder.find_one("*/qt5/resources", [Finder.is_dir]):
             self._qt5_dirs["Data"] = data_path.parent
 
     def _configure_qt6(self):
@@ -180,46 +164,39 @@ class Qt(BaseHelper):
                 self._write_qt6_conf(qt_conf, path)
 
     def _locate_qt6_dirs(self):
-        libqt6core_path = self.finder.find_one(
+        if libqt6core_path := self.finder.find_one(
             "*/libQt6Core.so.*", [Finder.is_file, Finder.is_elf_shared_lib]
-        )
-        if libqt6core_path:
+        ):
             self._qt6_dirs["Libraries"] = libqt6core_path.parent
         else:
             # don't go any forward if libQt6Core is not found
             return
 
-        qtwebengine_path = self.finder.find_one(
+        if qtwebengine_path := self.finder.find_one(
             "*/QtWebEngineProcess", [Finder.is_file, Finder.is_executable]
-        )
-        if qtwebengine_path:
+        ):
             self._qt6_dirs["LibraryExecutables"] = qtwebengine_path.parent
 
-        qmake_path = self.finder.find_one(
+        if qmake_path := self.finder.find_one(
             "*/qmake6", [Finder.is_file, Finder.is_executable]
-        )
-        if qmake_path:
+        ):
             self._qt6_dirs["Binaries"] = qmake_path.parent
 
-        libqminimal_path = self.finder.find_one(
+        if libqminimal_path := self.finder.find_one(
             "*/libqminimal.so", [Finder.is_file, Finder.is_elf]
-        )
-        if libqminimal_path:
+        ):
             self._qt6_dirs["Plugins"] = libqminimal_path.parent.parent
 
-        builtins_qmltypes_path = self.finder.find_one(
+        if builtins_qmltypes_path := self.finder.find_one(
             "*/builtins.qmltypes", [Finder.is_file]
-        )
-        if builtins_qmltypes_path:
+        ):
             self._qt6_dirs["QmlImports"] = builtins_qmltypes_path.parent
             self._qt6_dirs["Qml2Imports"] = builtins_qmltypes_path.parent
 
-        qtbase_translations_path = self.finder.find_one(
+        if qtbase_translations_path := self.finder.find_one(
             "*/qt6/translations", [Finder.is_dir]
-        )
-        if qtbase_translations_path:
+        ):
             self._qt6_dirs["Translations"] = qtbase_translations_path
 
-        data_path = self.finder.find_one("*/qt6/resources", [Finder.is_dir])
-        if data_path:
+        if data_path := self.finder.find_one("*/qt6/resources", [Finder.is_dir]):
             self._qt6_dirs["Data"] = data_path.parent

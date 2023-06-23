@@ -29,8 +29,7 @@ class FilePackageResolver:
 
     def resolve(self, files) -> {}:
         output = self._run_pacman_f(files)
-        results = self._parse_pacman_f_output(output)
-        return results
+        return self._parse_pacman_f_output(output)
 
     def _run_pacman_f(self, files):
         # make sure that the files are str
@@ -45,8 +44,7 @@ class FilePackageResolver:
         command = command.format(**self._cli_tools, files=" ".join(files))
         self.logger.info(command)
         _proc = subprocess.run(command, stdout=subprocess.PIPE, shell=True, env=env)
-        stdout_data = _proc.stdout.decode()
-        return stdout_data
+        return _proc.stdout.decode()
 
     @staticmethod
     def _parse_pacman_f_output(output):

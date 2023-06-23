@@ -35,7 +35,11 @@ class AppRun3GLibStdCppSetupHelper(AppRun3Helper):
             self._deploy_check_glibstdcpp_binary()
 
             libstdcpp_version = self._extract_libstdcpp_version()
-            library_paths = set([entry.path.parent for entry in self._glibstdcpp_module_files if entry.soname])
+            library_paths = {
+                entry.path.parent
+                for entry in self._glibstdcpp_module_files
+                if entry.soname
+            }
 
             self._generate_glibstdcpp_module_config(libstdcpp_version, library_paths)
 
@@ -71,10 +75,11 @@ class AppRun3GLibStdCppSetupHelper(AppRun3Helper):
         apprun_utils.write_config_file(config, glibstdcpp_module_config_path)
 
     def _extract_libstdcpp_version(self):
-        version = None
-        for entry in self._glibstdcpp_module_files:
-            if entry.soname == 'libstdc++.so.6':
-                # extract libstdc++ version from file name
-                version = entry.path.name.split('.so.')[-1]
-                break
-        return version
+        return next(
+            (
+                entry.path.name.split('.so.')[-1]
+                for entry in self._glibstdcpp_module_files
+                if entry.soname == 'libstdc++.so.6'
+            ),
+            None,
+        )

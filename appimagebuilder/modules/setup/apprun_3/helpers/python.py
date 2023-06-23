@@ -16,15 +16,17 @@ from appimagebuilder.modules.setup.apprun_3.helpers.base_helper import AppRun3He
 
 class AppRun3Python(AppRun3Helper):
     def run(self):
-        python_bin = self.context.app_dir.find_one(["*/bin/python2*", "*/bin/python3*"])
-        if python_bin:
+        if python_bin := self.context.app_dir.find_one(
+            ["*/bin/python2*", "*/bin/python3*"]
+        ):
             logging.info("Found python binary: %s", python_bin.path)
             python_home = python_bin.path.parent.parent
             self.context.runtime_env["PYTHONHOME"] = str(python_home)
             logging.info("Setting PYTHONHOME to: %s", python_home)
 
-        python_site_package = self.context.app_dir.find_one(["*/python*/site-packages/*/*"])
-        if python_site_package:
+        if python_site_package := self.context.app_dir.find_one(
+            ["*/python*/site-packages/*/*"]
+        ):
             python_path = python_site_package.path.parent.parent
             self.context.runtime_env["PYTHONPATH"] = str(python_path)
             logging.info("Setting PYTHONPATH to: %s", python_path)

@@ -36,10 +36,7 @@ class Roamer(roam.Roamer):
             *args, _raise=_raise, _roam=_roam, _invoke=_invoke, **kwargs
         )
 
-        if resolve_variables:
-            return self._resolve_variables(result)
-        else:
-            return result
+        return self._resolve_variables(result) if resolve_variables else result
 
     def __getattr__(self, attr_name):
         result = super().__getattr__(attr_name)
@@ -50,27 +47,18 @@ class Roamer(roam.Roamer):
             return self._replace_env_variables_in_str(variable)
 
         if isinstance(variable, list):
-            new_list = []
-            for v in variable:
-                new_list.append(self._resolve_variables(v))
-            return new_list
-
+            return [self._resolve_variables(v) for v in variable]
         if isinstance(variable, dict):
-            new_dict = {}
-            for k, v in variable.items():
-                new_dict[k] = self._resolve_variables(v)
-
-            return new_dict
-
+            return {k: self._resolve_variables(v) for k, v in variable.items()}
         return variable
 
     def _replace_env_variables_in_str(self, variable):
         new_val = variable
-        for item in re.findall(r"{{\s?\w+\s?}}", variable):
+        for item in re.findall(r"{{\s?\w+\s?}}", new_val):
             var_name = item[2:-2]
             var_name = var_name.strip()
             if var_name not in os.environ:
-                raise RuntimeError("Missing environment variable: '%s'" % var_name)
+                raise RuntimeError(f"Missing environment variable: '{var_name}'")
             value = os.environ[var_name]
             new_val = new_val.replace(item, value, 1)
 

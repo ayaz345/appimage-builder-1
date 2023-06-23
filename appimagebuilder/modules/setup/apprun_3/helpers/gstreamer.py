@@ -30,8 +30,7 @@ class AppRun3GStreamer(AppRun3Helper):
         self._generate_gst_registry()
 
     def _set_gst_plugins_path(self):
-        gst_1_lib = self.context.app_dir.find_one(["*/libgstreamer-1.0.so.0"])
-        if gst_1_lib:
+        if gst_1_lib := self.context.app_dir.find_one(["*/libgstreamer-1.0.so.0"]):
             self._plugins_path = gst_1_lib.path.parent / "gstreamer-1.0"
 
             self.context.runtime_env["GST_PLUGIN_PATH"] = self._plugins_path.__str__()
@@ -41,15 +40,15 @@ class AppRun3GStreamer(AppRun3Helper):
             logging.info(f"GST_REGISTRY set to: {self._plugins_path}")
 
     def _set_gst_plugins_scanner_path(self):
-        gst_plugins_scanner = self.context.app_dir.find_one(["gst-plugin-scanner"])
-        if gst_plugins_scanner:
+        if gst_plugins_scanner := self.context.app_dir.find_one(
+            ["gst-plugin-scanner"]
+        ):
             self.context.runtime_env["GST_REGISTRY_REUSE_PLUGIN_SCANNER"] = "no"
             self.context.runtime_env["GST_PLUGIN_SCANNER"] = gst_plugins_scanner.path.__str__()
             logging.info(f"GST_PLUGIN_SCANNER set to: {gst_plugins_scanner}")
 
     def _set_ptp_helper_path(self):
-        gst_ptp_helper = self.context.app_dir.find_one(["*/gst-ptp-helper"])
-        if gst_ptp_helper:
+        if gst_ptp_helper := self.context.app_dir.find_one(["*/gst-ptp-helper"]):
             self.context.runtime_env["GST_PTP_HELPER"] = gst_ptp_helper.path.__str__()
             logging.info(f"GST_PTP_HELPER set to: {gst_ptp_helper}")
 
@@ -71,11 +70,11 @@ class AppRun3GStreamer(AppRun3Helper):
                 self.context.runtime_env["GST_REGISTRY_UPDATE"] = "no"
                 logging.info(f"GST_REGISTRY generated at: {gst_registry_path}")
             else:
-                logging.warning(f"GST_REGISTRY generation failed!")
+                logging.warning("GST_REGISTRY generation failed!")
                 del self.context.runtime_env["GST_REGISTRY"]
         else:
             logging.warning(
-                f"gst-launch-1.0 not found! It is required to generate gstreamer registry"
+                "gst-launch-1.0 not found! It is required to generate gstreamer registry"
             )
 
     def _prepare_gst_launch_env(self):

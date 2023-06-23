@@ -24,7 +24,6 @@ def make_symlinks_relative(file):
                 link_target, os.path.join("/", os.path.dirname(file))
             )
             logging.info(
-                "Fixing symlink %s target: from %s to %s"
-                % (file, link_target, new_link_target)
+                f"Fixing symlink {file} target: from {link_target} to {new_link_target}"
             )
             os.symlink(new_link_target, file)

@@ -35,11 +35,11 @@ class ExecutionTest:
         self.env = env
 
         self.client = docker.from_env()
-        self.logger = logging.getLogger("TEST CASE '%s'" % self.name)
+        self.logger = logging.getLogger(f"TEST CASE '{self.name}'")
 
     def run(self):
         logging.info("")
-        logging.info("Running test: %s" % self.name)
+        logging.info(f"Running test: {self.name}")
         logging.info("-----------------------------")
 
         volumes = self._get_container_volumes()
@@ -61,13 +61,13 @@ class ExecutionTest:
         try:
             self.logger.info("before command")
             self._run_command(
-                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")),
+                f'useradd -mu {os.getuid()} {os.getenv("USER")}',
                 container,
                 accepted_exit_codes=[0, 9],
             )
 
             self._run_command(
-                "mkdir -p /home/%s/.config" % os.getenv("USER"),
+                f'mkdir -p /home/{os.getenv("USER")}/.config',
                 container,
                 user=os.getenv("USER"),
             )
@@ -84,12 +84,12 @@ class ExecutionTest:
         if accepted_exit_codes is None:
             accepted_exit_codes = [0]
 
-        print("$ %s" % command)
+        print(f"$ {command}")
         exit_code, output = container.exec_run(command, user=user, tty=True)
         print(output.decode())
 
         if exit_code not in accepted_exit_codes:
-            print("$ %s FAILED, exit code: %s" % (command, exit_code))
+            print(f"$ {command} FAILED, exit code: {exit_code}")
             raise TestFailed()
 
     def _print_container_logs(self, ctr):
@@ -103,27 +103,20 @@ class ExecutionTest:
             "/tmp/.X11-unix": {"bind": "/tmp/.X11-unix", "mode": "rw"},
         }
 
-        dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
-
-        if dbus_session_address:
+        if dbus_session_address := os.getenv("DBUS_SESSION_BUS_ADDRESS"):
             regex = re.compile("unix:path=(?P<dbus_path>(\/\w+)+)")
-            search_result = regex.search(dbus_session_address)
-            if search_result:
-                volumes[search_result.group(1)] = {
-                    "bind": search_result.group(1),
-                    "mode": "rw",
-                }
+            if search_result := regex.search(dbus_session_address):
+                volumes[search_result[1]] = {"bind": search_result[1], "mode": "rw"}
 
         return volumes
 
     def get_container_environment(self):
-        self.env.append("DISPLAY=%s" % os.getenv("DISPLAY"))
+        self.env.append(f'DISPLAY={os.getenv("DISPLAY")}')
 
-        dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
-        if dbus_session_address:
-            self.env.append("DBUS_SESSION_BUS_ADDRESS=%s" % dbus_session_address)
+        if dbus_session_address := os.getenv("DBUS_SESSION_BUS_ADDRESS"):
+            self.env.append(f"DBUS_SESSION_BUS_ADDRESS={dbus_session_address}")
 
-        self.env.append("UID=%s" % os.getuid())
-        self.env.append("UNAME=%s" % os.getenv("USER"))
+        self.env.append(f"UID={os.getuid()}")
+        self.env.append(f'UNAME={os.getenv("USER")}')
         self.env.append("XDG_DATA_DIRS=/usr/share:/usr/local/share")
         return self.env

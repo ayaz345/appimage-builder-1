@@ -19,6 +19,7 @@ from ..environment import Environment
 
 class OpenSSL(BaseHelper):
     def configure(self, env: Environment, preserve_files):
-        engines_dir = self.finder.find_one("*/openssl-*/engines", [Finder.is_dir])
-        if engines_dir:
+        if engines_dir := self.finder.find_one(
+            "*/openssl-*/engines", [Finder.is_dir]
+        ):
             env.set("OPENSSL_ENGINES", engines_dir)

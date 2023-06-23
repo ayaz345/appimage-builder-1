@@ -66,9 +66,8 @@ def read_shebang(path):
         with open(path, "rb") as fhandler:
             line = fhandler.readline().strip().decode()
 
-        if len(line) > 2 and line[0:2] == '#!':
-            shebang_split = shlex.split(line[2:].strip())
-            return shebang_split
+        if len(line) > 2 and line[:2] == '#!':
+            return shlex.split(line[2:].strip())
     except UnicodeDecodeError:
         pass
 
@@ -78,12 +77,14 @@ def read_shebang(path):
 def remove_left_slashes_on_shebang(chunk):
     """Removes left slashes on shebang"""
 
-    for i in range(2, len(chunk)):
-        # if the character is not a slash, we are done
-        if chunk[i] != ord("/") and chunk[i] != ord(" "):
-            return chunk[:2] + b" " * (i - 2) + chunk[i:]
-
-    return chunk
+    return next(
+        (
+            chunk[:2] + b" " * (i - 2) + chunk[i:]
+            for i in range(2, len(chunk))
+            if chunk[i] not in [ord("/"), ord(" ")]
+        ),
+        chunk,
+    )
 
 
 def replace_app_dir_in_path(appdir, path):

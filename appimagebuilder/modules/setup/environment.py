@@ -13,10 +13,7 @@
 
 class Environment:
     def __init__(self, values=None):
-        if values:
-            self._env = values
-        else:
-            self._env = dict()
+        self._env = values if values else {}
 
     def __contains__(self, item):
         return item in self._env
@@ -38,7 +35,7 @@ class Environment:
 
     def get(self, key):
         if key not in self._env:
-            raise RuntimeError("Environment '%s' required but not found" % key)
+            raise RuntimeError(f"Environment '{key}' required but not found")
         return self._env[key]
 
     def keys(self):
@@ -63,10 +60,7 @@ class Environment:
         return self._env.items()
 
     def serialize(self):
-        lines = []
-        for k, v in self.items():
-            lines.append(self._serialize_entry(k, v))
-
+        lines = [self._serialize_entry(k, v) for k, v in self.items()]
         lines = [line + "\n" for line in lines]
         return "".join(lines)
 
@@ -81,14 +75,11 @@ class Environment:
             return self._serialize_list(k, v, ":")
 
         if isinstance(v, dict):
-            entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
+            entries = [f"{k}:{v};" for (k, v) in v.items()]
             entries_str = "".join(entries)
             return f"{k}={entries_str}"
 
-        if v is None:
-            return f'{k}=""'
-
-        return f"{k}={v}"
+        return f'{k}=""' if v is None else f"{k}={v}"
 
     def _serialize_list(self, k, values, separator):
         values_str = separator.join(values)

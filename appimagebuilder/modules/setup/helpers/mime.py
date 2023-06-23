@@ -19,8 +19,7 @@ class MIME(BaseHelper):
     def configure(self, env, preserve_files):
         path = self.finder.base_path / "usr" / "share" / "mime"
         if path.is_dir():
-            bin_path = shutil.which("update-mime-database")
-            if not bin_path:
+            if bin_path := shutil.which("update-mime-database"):
+                subprocess.run([bin_path, path])
+            else:
                 raise RuntimeError("Missing 'update-mime-database' executable")
-
-            subprocess.run([bin_path, path])

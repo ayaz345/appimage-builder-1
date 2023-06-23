@@ -21,12 +21,11 @@ class FakePath:
         self.children = children
 
     def glob(self, pattern):
-        results = []
-        for file in self.children:
-            if fnmatch.fnmatch(file, pattern):
-                results.append(FakePath(file, []))
-
-        return results
+        return [
+            FakePath(file, [])
+            for file in self.children
+            if fnmatch.fnmatch(file, pattern)
+        ]
 
     def relative_to(self, fake_path):
         return os.path.relpath(self.path, fake_path.path)

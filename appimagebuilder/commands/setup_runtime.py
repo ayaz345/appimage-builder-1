@@ -39,6 +39,6 @@ class SetupRuntimeCommand(Command):
             runtime_setup = AppRunV3Setup(self.context)
 
         if not runtime_setup:
-            raise RuntimeError("Unsupported runtime version: %s" % apprun_version)
+            raise RuntimeError(f"Unsupported runtime version: {apprun_version}")
 
         runtime_setup.setup()

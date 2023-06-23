@@ -19,13 +19,7 @@ class FakeBundleInfoGathererUi(BundleInfoGathererUi):
     edit_postfix = " edited"
 
     def ask_text(self, text, default=None):
-        if default:
-            return default + self.edit_postfix
-        else:
-            return self.default_result
+        return default + self.edit_postfix if default else self.default_result
 
     def ask_select(self, text, choices, default=None):
-        if default:
-            return default
-        else:
-            return choices[-1]
+        return default if default else choices[-1]

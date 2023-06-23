@@ -94,8 +94,7 @@ class AppRuntimeAnalyser:
     def _resolve_appdir_library_paths(self, app_dir):
         finder = Finder(app_dir)
         lib_paths = finder.find("*", [Finder.is_elf_shared_lib])
-        library_paths = set([os.path.dirname(path) for path in lib_paths])
-        return library_paths
+        return {os.path.dirname(path) for path in lib_paths}
 
     def _resolve_bin_interpreters(self, executable_files):
         self.logger.info("Reading PT_INTERP from executables")
@@ -142,8 +141,4 @@ class AppRuntimeAnalyser:
             "**/glib-2.0/**/gschemas.compiled",
         ]
 
-        for expr in excluded_data_paths:
-            if fnmatch.fnmatch(path, expr):
-                return True
-
-        return False
+        return any(fnmatch.fnmatch(path, expr) for expr in excluded_data_paths)

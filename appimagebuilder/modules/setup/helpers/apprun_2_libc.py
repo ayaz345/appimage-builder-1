@@ -41,12 +41,11 @@ class AppRun2LibC(BaseHelper):
         if not path:
             raise InterpreterHandlerError("Unable to find libc.so")
 
-        logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
+        logging.info(f"Libc found at: {os.path.relpath(path, self.app_dir)}")
         return path
 
     def get_glibc_versioned_path(self) -> Optional[Path]:
-        path = self.finder.find_one("*/libc-*.so", [Finder.is_elf_shared_lib])
-        if path:
+        if path := self.finder.find_one("*/libc-*.so", [Finder.is_elf_shared_lib]):
             return pathlib.Path(path)
         else:
             return None
@@ -56,7 +55,7 @@ class AppRun2LibC(BaseHelper):
             env.set("APPDIR_LIBC_LIBRARY_PATH", self._get_libc_library_paths())
             env.set("APPDIR_LIBC_VERSION", self._guess_libc_version())
         except InterpreterHandlerError as err:
-            logging.warning("%s" % err)
+            logging.warning(f"{err}")
             logging.warning(
                 "The resulting bundle will not be backward compatible as libc is not present"
             )
@@ -64,22 +63,20 @@ class AppRun2LibC(BaseHelper):
     def _guess_libc_version(self):
         version_in_filename = self._read_libc_version_from_filename()
         if version_in_filename:
-            logging.info("Taking libc version from filename: %s" % version_in_filename)
+            logging.info(f"Taking libc version from filename: {version_in_filename}")
             return version_in_filename
 
         libc_path = self.get_glibc_path()
-        version_in_embed_strings = self.read_libc_version_from_embed_strings(libc_path)
-        if version_in_embed_strings:
-            logging.info(
-                "Taking libc version from embed strings: %s" % version_in_filename
-            )
+        if version_in_embed_strings := self.read_libc_version_from_embed_strings(
+            libc_path
+        ):
+            logging.info(f"Taking libc version from embed strings: {version_in_filename}")
             return version_in_embed_strings
 
         raise InterpreterHandlerError("Unable to determine glibc version")
 
     def _read_libc_version_from_filename(self):
-        libc_versioned_path = self.get_glibc_versioned_path()
-        if libc_versioned_path:
+        if libc_versioned_path := self.get_glibc_versioned_path():
             version_str = libc_versioned_path.stem.split("-")[-1]
             if re.match(r"\d+\.\d+\.?\d*", version_str):
                 return version_str
@@ -98,8 +95,7 @@ class AppRun2LibC(BaseHelper):
         glib_version_re = re.compile(r"GLIBC_(?P<version>\d+\.\d+\.?\d*)")
         with open(libc_path, "rb") as f:
             content = str(f.read())
-            glibc_version_strings = glib_version_re.findall(content)
-            if glibc_version_strings:
+            if glibc_version_strings := glib_version_re.findall(content):
                 glibc_version_strings = map(version.parse, glibc_version_strings)
                 max_glibc_version = reduce(
                     (lambda x, y: max(x, y)), glibc_version_strings

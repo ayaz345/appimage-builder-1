@@ -16,6 +16,7 @@
  a different partition.
 """
 
+
 # libc, libstdc++ its close dependencies, those packages will be deployed to AppDir/runtime/compat
 glibc = ["libc6", "zlib1g", "libstdc++6"]
 
@@ -86,7 +87,6 @@ graphics = [
     "libwayland-*",
 ]
 
-default_exclude_list = []
-default_exclude_list.extend(apt_core)
+default_exclude_list = list(apt_core)
 default_exclude_list.extend(system_services)
 default_exclude_list.extend(graphics)

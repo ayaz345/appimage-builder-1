@@ -111,9 +111,8 @@ class RecipeSchema:
     def validate(self, recipe: Roamer):
         if recipe.version() == 1:
             return self.v1.validate(recipe(resolve_variables=False))
-        else:
-            logging.error("Unknown recipe version: %s" % recipe.version())
-            logging.info(
-                "Please make sure you're using the latest appimage-builder version"
-            )
-            exit(1)
+        logging.error(f"Unknown recipe version: {recipe.version()}")
+        logging.info(
+            "Please make sure you're using the latest appimage-builder version"
+        )
+        exit(1)

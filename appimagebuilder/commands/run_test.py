@@ -33,7 +33,7 @@ class RunTestCommand(Command):
         try:
             test_cases = self._load_tests(self.tests_settings())
         except DockerException as e:
-            logging.error("Docker error : "+str(e))
+            logging.error(f"Docker error : {str(e)}")
             logging.error("(Is docker installed/started ?)")
             logging.error("Tests will be skipped")
             return
@@ -54,7 +54,7 @@ class RunTestCommand(Command):
             data_accessor = Roamer(data)
             env = data_accessor.env() or []
             if isinstance(env, dict):
-                env = ["%s=%s" % (k, v) for k, v in env.items()]
+                env = [f"{k}={v}" for k, v in env.items()]
 
             test = ExecutionTest(
                 appdir=self.app_dir,

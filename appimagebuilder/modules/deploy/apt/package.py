@@ -30,7 +30,7 @@ class Package:
         self.arch = arch
 
     def get_expected_file_name(self):
-        file_name = "%s_%s_%s.deb" % (self.name, self.version, self.arch)
+        file_name = f"{self.name}_{self.version}_{self.arch}.deb"
 
         # apt encodes invalid chars to comply the deb file naming convention
         file_name = urllib.parse.quote(file_name, safe="+*~")
@@ -42,7 +42,7 @@ class Package:
         return file_name
 
     def get_apt_install_string(self):
-        return "%s:%s=%s" % (self.name, self.arch, self.version)
+        return f"{self.name}:{self.arch}={self.version}"
 
     @staticmethod
     def from_file_path(path):
@@ -69,9 +69,9 @@ class Package:
         """apt input format"""
         output = self.name
         if self.arch:
-            output = "%s:%s" % (output, self.arch)
+            output = f"{output}:{self.arch}"
         if self.version:
-            output = "%s=%s" % (output, self.version)
+            output = f"{output}={self.version}"
         return output
 
     def __gt__(self, other):

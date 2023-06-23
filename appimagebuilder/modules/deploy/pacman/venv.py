@@ -47,7 +47,7 @@ class Venv:
         self._keyrings = []
         self._architecture = architecture
         self._options = user_options if user_options else {}
-        self._deps = dict()
+        self._deps = {}
 
         self._db_path.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
@@ -77,15 +77,13 @@ class Venv:
         for package in initial_install_list:
             pkg_name, pkg_version = package.split("=", 1)
             if pkg_name in excluded_packages:
-                exclude_str = exclude_str + "--assume-installed %s " % package
+                exclude_str = f"{exclude_str}--assume-installed {package} "
 
             if pkg_name in packages:
-                packages_str = packages_str + "%s " % package
+                packages_str = f"{packages_str}{package} "
 
         self._run_pacman_download_packages(packages_str, exclude_str)
-        files = self._run_pacman_list_package_files(exclude_str, packages_str)
-
-        return files
+        return self._run_pacman_list_package_files(exclude_str, packages_str)
 
     def extract(self, file, target):
         os.makedirs(target, exist_ok=True)
@@ -129,23 +127,21 @@ class Venv:
         output = self._run_command(
             command, packages=packages_str, exclude=exclude_str, stdout=subprocess.PIPE
         )  # noqa:
-        files = re.findall("file://(.*)", output.stdout.read().decode("utf-8"))
-        return files
+        return re.findall("file://(.*)", output.stdout.read().decode("utf-8"))
 
     def read_package_data(self, file):
         output = self._run_command(
             "{pacman} -Qp {file}", file=file, stdout=subprocess.PIPE  # noqa:
         )
 
-        lines = output.stdout.read().decode("utf-8").splitlines()  # noqa:
-        if lines:
+        if lines := output.stdout.read().decode("utf-8").splitlines():
             first_line = lines[0]
             line_parts = first_line.split(" ")
 
             # name, version
             return line_parts[0], line_parts[1]
 
-        raise PacmanVenvError("Unable to read package info from: '%s'" % file)
+        raise PacmanVenvError(f"Unable to read package info from: '{file}'")
 
     def _generate_config(self):
         with open(self._config_path, "w") as f:
@@ -163,7 +159,7 @@ class Venv:
                 f.write("Include = /etc/pacman.conf\n")
 
             for k, v in self._options.items():
-                self._logger.warning("Setting option: %s = %s" % (k, v))
+                self._logger.warning(f"Setting option: {k} = {v}")
                 f.write("%s = %s\n" % (k, v))
 
             if self._repositories:

@@ -63,16 +63,11 @@ class AppRunV3Setup:
         self._deploy_apprun_config()
 
     def _find_dirs_containing_libraries(self):
-        library_paths = set()
-
-        for file in self.context.app_dir.files.values():
-            # check if the binary is a library
-            if file.soname and not self._is_file_in_a_module(file):
-                # record the library dir path for later use in the apprun config generation
-                library_dir = file.path.parent
-                library_paths.add(library_dir)
-
-        return library_paths
+        return {
+            file.path.parent
+            for file in self.context.app_dir.files.values()
+            if file.soname and not self._is_file_in_a_module(file)
+        }
 
     def _is_file_in_a_module(self, file: AppDirFileInfo):
         """Checks if a file belongs to a module"""
@@ -131,7 +126,7 @@ class AppRunV3Setup:
     def _deploy_apprun_config(self):
         """Deploys the AppRun config file"""
 
-        exec_line = ["$APPDIR/" + self.context.app_info.exec]
+        exec_line = [f"$APPDIR/{self.context.app_info.exec}"]
         if self.context.app_info.exec_args:
             exec_line.extend(shlex.split(self.context.app_info.exec_args))
         else:
@@ -158,7 +153,7 @@ class AppRunV3Setup:
             },
         }
 
-        if len(list(self.context.modules_dir.iterdir())) > 0:
+        if list(self.context.modules_dir.iterdir()):
             config["runtime"]["modules_dir"] = (
                     "$APPDIR/"
                     + self.context.modules_dir.relative_to(self.context.app_dir.path).__str__()
@@ -232,9 +227,7 @@ class AppRunV3Setup:
 
         # get executable archictecture
         executable_path = self.context.app_dir.path / self.context.app_info.exec
-        arch = self._get_executable_architecture(executable_path)
-
-        return arch
+        return self._get_executable_architecture(executable_path)
 
     def _get_executable_architecture(self, executable_path):
         """Resolves the executable architecture"""
@@ -252,21 +245,17 @@ class AppRunV3Setup:
                     f"{error_message_prefix}, Could not find executable {current_executable_path} in AppDir"
                 )
 
-            binary = lief.parse(current_executable_path.__str__())
-            if binary:
+            if binary := lief.parse(current_executable_path.__str__()):
                 arch = binary.header.machine_type.name
+            elif shebang := apprun_utils.read_shebang(current_executable_path):
+                rel_interpreter_path = shebang[0].lstrip("/")
+                current_executable_path = (
+                        self.context.app_dir.path / rel_interpreter_path
+                )
             else:
-                # try read shebang
-                shebang = apprun_utils.read_shebang(current_executable_path)
-                if shebang:
-                    rel_interpreter_path = shebang[0].lstrip("/")
-                    current_executable_path = (
-                            self.context.app_dir.path / rel_interpreter_path
-                    )
-                else:
-                    raise Exception(
-                        f"{error_message_prefix}, not elf or script executable: {current_executable_path}"
-                    )
+                raise Exception(
+                    f"{error_message_prefix}, not elf or script executable: {current_executable_path}"
+                )
 
         if not arch:
             raise Exception(
@@ -295,7 +284,7 @@ class AppRunV3Setup:
             with open(entry.path.__str__(), "rb+") as f:
                 # assume that the shebang is not longer than 1024 bytes
                 chunk = f.read(1024)
-                if chunk[0:2] == b"#!":
+                if chunk[:2] == b"#!":
                     chunk = apprun_utils.remove_left_slashes_on_shebang(chunk)
 
                     # write back the modified chunk

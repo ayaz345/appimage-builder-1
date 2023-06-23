@@ -87,6 +87,5 @@ def get_arch(path):
             return known_architectures[e_machine]
         else:
             raise RuntimeError(
-                "Unknown instructions set architecture `%s` on: %s"
-                % (e_machine.hex(), path)
+                f"Unknown instructions set architecture `{e_machine.hex()}` on: {path}"
             )

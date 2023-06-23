@@ -51,18 +51,15 @@ class ExecutablesPatcher:
     def make_bin_path_in_shebang_relative(shebang):
         shebang_len = len(shebang)
         idx = 2
-        while shebang_len > idx and (shebang[idx] == "/" or shebang[idx] == " "):
-            idx = idx + 1
+        while shebang_len > idx and shebang[idx] in ["/", " "]:
+            idx += 1
 
-        patched = shebang[:2] + " " * (idx - 2) + shebang[idx:]
-
-        return patched
+        return shebang[:2] + " " * (idx - 2) + shebang[idx:]
 
     def patch_binary_executable(self, path: pathlib.Path):
         try:
             binary = lief.parse(path.__str__())
-            interpreter_path = binary.interpreter
-            if interpreter_path:
+            if interpreter_path := binary.interpreter:
                 patched_interpreter_path = interpreter_path.lstrip("/")
                 binary.interpreter = patched_interpreter_path
                 binary.write(path.__str__())

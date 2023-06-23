@@ -19,9 +19,8 @@ from ..environment import Environment
 
 class Python(BaseHelper):
     def configure(self, env: Environment, preserve_files):
-        python_path = self.finder.find_one(
+        if python_path := self.finder.find_one(
             "*/bin/python?", [Finder.is_file, Finder.is_executable]
-        )
-        if python_path:
+        ):
             python_home = Path(python_path).parent.parent
             env.set("PYTHONHOME", str(python_home))

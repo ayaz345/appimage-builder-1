@@ -41,15 +41,10 @@ class AppImageMount:
             [abs_target_path, "--appimage-mount"], stdout=subprocess.PIPE
         )
         self.path = self._process.stdout.readline().decode("utf-8").strip()
-        ret_code = self._process.poll()
-
-        if not ret_code:
-            logging.info("AppImage mounted at: %s" % self.path)
-            return self.path
-        else:
-            raise RuntimeError(
-                "Unable to run: %s --appimage-mount" % self._appimage_path
-            )
+        if ret_code := self._process.poll():
+            raise RuntimeError(f"Unable to run: {self._appimage_path} --appimage-mount")
+        logging.info(f"AppImage mounted at: {self.path}")
+        return self.path
 
     def unmount(self):
         self._process.kill()

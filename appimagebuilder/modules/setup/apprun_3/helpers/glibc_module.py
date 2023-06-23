@@ -74,16 +74,15 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
     def _extract_library_paths_from_glibc_module_files(self):
         """Extracts library paths from glibc module files"""
 
-        library_paths = set()
-        for module_file in self._glibc_module_files:
-            if module_file.soname:
-                library_paths.add(module_file.path.parent.__str__())
-
-        return library_paths
+        return {
+            module_file.path.parent.__str__()
+            for module_file in self._glibc_module_files
+            if module_file.soname
+        }
 
     def _generate_glibc_module_config(self, library_paths):
         library_paths = [replace_app_dir_in_path(self.context.app_dir.path, path) for path in library_paths]
-        runtime_dir = "$APPDIR/" + self._module_dir.relative_to(self.context.app_dir.path).__str__()
+        runtime_dir = f"$APPDIR/{self._module_dir.relative_to(self.context.app_dir.path).__str__()}"
         config = {
             "version": "1.0",
             "check": {
@@ -106,9 +105,7 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
         for file in self._glibc_module_files:
             file_path = file.path
             if file_path.match("libc-*.so"):
-                glibc_version = file_path.stem.split("-")[1]
-                return glibc_version
-
+                return file_path.stem.split("-")[1]
         # find unversioned glibc file
         unversioned_glibc_file_path = None
         for file in self._glibc_module_files:

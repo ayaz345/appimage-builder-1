@@ -26,17 +26,14 @@ class FilePackageResolver:
 
     def resolve(self, files) -> {}:
         stdout_data = self._run_dpkg_query_s(files)
-        results = self._parse_dpkg_query_s_output(stdout_data)
-
-        return results
+        return self._parse_dpkg_query_s_output(stdout_data)
 
     def _run_dpkg_query_s(self, files):
         command = "{dpkg-query} -S {files}"
         command = command.format(**self._cli_tools, files=" ".join(files))
         self.logger.info(command)
         _proc = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
-        stdout_data = _proc.stdout.decode()
-        return stdout_data
+        return _proc.stdout.decode()
 
     def _parse_dpkg_query_s_output(self, stdout_data):
         results = {}

@@ -47,10 +47,10 @@ class PackageFilter:
         return filtered_packages
 
     def _is_package_blacklisted(self, pkg_name):
-        for pattern in self.exclusion_patterns:
-            if fnmatch.fnmatch(pkg_name, pattern):
-                return True
-        return False
+        return any(
+            fnmatch.fnmatch(pkg_name, pattern)
+            for pattern in self.exclusion_patterns
+        )
 
     def discard_simblings(self, packages):
         dpkg_query = DpkgQuery()

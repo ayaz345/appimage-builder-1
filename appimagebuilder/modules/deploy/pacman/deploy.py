@@ -69,10 +69,10 @@ class Deploy:
         # don't exclude explicitly required packages
         exclude = [pkg for pkg in exclude if pkg not in packages]
 
-        self.logger.debug("Excluded packages: %s" % " ".join(exclude))
+        self.logger.debug(f'Excluded packages: {" ".join(exclude)}')
 
         package_files = self.pacman_venv.retrieve(packages, exclude)
-        self.logger.debug("Candidate packages: %s" % " ".join(package_files))
+        self.logger.debug(f'Candidate packages: {" ".join(package_files)}')
 
         deployed_packages = []
         for file in package_files:
@@ -83,9 +83,9 @@ class Deploy:
                 else appdir_root
             )
 
-            self.logger.info("Deploying %s=%s to %s" % (name, version, target))
+            self.logger.info(f"Deploying {name}={version} to {target}")
             self.pacman_venv.extract(file, target)
-            deployed_packages.append("%s=%s" % (name, version))
+            deployed_packages.append(f"{name}={version}")
 
         # create symlinks existent in a regular archlinux system
         os.symlink("usr/bin", appdir_root / "bin")

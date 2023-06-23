@@ -32,7 +32,7 @@ class AppImagePrimer(BasePrimer):
         self.config = self.context.recipe.AppImage
         self.bundle_main_arch = self.config.arch()
         self.carrier_path = (
-            self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
+            self.context.build_dir / "prime" / f"runtime-{self.bundle_main_arch}"
         )
 
         appimage_file_name = self._resolve_appimage_file_name()
@@ -61,16 +61,11 @@ class AppImagePrimer(BasePrimer):
         self._make_appimage_executable()
 
     def _resolve_appimage_file_name(self):
-        if not self.context.recipe.AppImage.file_name():
-            appimage_file_name = "%s-%s-%s.AppImage" % (
-                self.context.app_info.name,
-                self.context.app_info.version,
-                self.bundle_main_arch,
-            )
-        else:
-            appimage_file_name = self.context.recipe.AppImage.file_name()
-
-        return appimage_file_name
+        return (
+            f"{self.context.app_info.name}-{self.context.app_info.version}-{self.bundle_main_arch}.AppImage"
+            if not self.context.recipe.AppImage.file_name()
+            else self.context.recipe.AppImage.file_name()
+        )
 
     def _make_squashfs(self, appdir: pathlib.Path):
         payload_path = appdir.with_suffix(".squashfs")
@@ -91,11 +86,8 @@ class AppImagePrimer(BasePrimer):
         return payload_path
 
     def _get_appimage_kit_runtime(self):
-        url = (
-            "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
-            % self.bundle_main_arch
-        )
-        logging.info("Downloading: %s" % url)
+        url = f"https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-{self.bundle_main_arch}"
+        logging.info(f"Downloading: {url}")
 
         os.makedirs(self.carrier_path.parent, exist_ok=True)
         request.urlretrieve(url, self.carrier_path)
@@ -115,9 +107,8 @@ class AppImagePrimer(BasePrimer):
         os.chmod(self.appimage_path, st.st_mode | stat.S_IEXEC)
 
     def _add_appimage_update_information(self, binary):
-        update_information = self.config["update-information"]()
-        if update_information:
-            self.logger.info('Setting update information: "%s"' % update_information)
+        if update_information := self.config["update-information"]():
+            self.logger.info(f'Setting update information: "{update_information}"')
             section = binary.get_section(".upd_info")
             self._patch_appimage(
                 section.file_offset, bytes(update_information, "utf-8")
@@ -126,8 +117,7 @@ class AppImagePrimer(BasePrimer):
     def _sign_bundle_sha256_digest(
         self, carrier_elf: lief.Binary, bundle_sha256: bytes
     ):
-        sign_key = self.config["sign-key"]()
-        if sign_key:
+        if sign_key := self.config["sign-key"]():
             gpg = gnupg.GPG()
             # sign both files as if they were together
 
@@ -154,8 +144,7 @@ class AppImagePrimer(BasePrimer):
         return md5.digest(), sha256.digest()
 
     def _add_md5_digest(self, carrier_binary, bundle_md5):
-        md5_digest_section = carrier_binary.get_section(".digest_md5")
-        if md5_digest_section:
+        if md5_digest_section := carrier_binary.get_section(".digest_md5"):
             self._patch_appimage(md5_digest_section.file_offset, bundle_md5)
 
     def _patch_appimage(self, offset, data):

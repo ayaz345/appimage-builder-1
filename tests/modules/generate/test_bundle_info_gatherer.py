@@ -67,7 +67,7 @@ class TestBundleInfoGatherer(TestCase):
         self.gatherer._confirm_bundle_update_information()
         self.assertEqual(
             self.gatherer._bundle_info.update_string,
-            "guess" + FakeBundleInfoGathererUi.edit_postfix,
+            f"guess{FakeBundleInfoGathererUi.edit_postfix}",
         )
 
     def test__confirm_application_version(self):
@@ -81,26 +81,17 @@ class TestBundleInfoGatherer(TestCase):
     def test__confirm_application_version_empty(self):
         preset = ""
         result = self.gatherer._confirm_application_version(preset)
-        self.assertEqual(
-            result,
-            "latest" + FakeBundleInfoGathererUi.edit_postfix,
-        )
+        self.assertEqual(result, f"latest{FakeBundleInfoGathererUi.edit_postfix}")
 
     def test__confirm_application_exec_args(self):
         preset = "$@"
         result = self.gatherer._confirm_application_exec_args(preset)
-        self.assertEqual(
-            result,
-            "$@" + FakeBundleInfoGathererUi.edit_postfix,
-        )
+        self.assertEqual(result, f"$@{FakeBundleInfoGathererUi.edit_postfix}")
 
     def test__confirm_application_exec_args_empty(self):
         preset = ""
         result = self.gatherer._confirm_application_exec_args(preset)
-        self.assertEqual(
-            result,
-            "$@" + FakeBundleInfoGathererUi.edit_postfix,
-        )
+        self.assertEqual(result, f"$@{FakeBundleInfoGathererUi.edit_postfix}")
 
     def test__confirm_application_exec_rel_path(self):
         preset = "app"
