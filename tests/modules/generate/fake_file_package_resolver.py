@@ -17,10 +17,4 @@ class FakeFilePackageResolver(FilePackageResolver):
         self.presets = presets
 
     def resolve(self, files) -> {}:
-        results = {}
-
-        for file in files:
-            if file in self.presets:
-                results[file] = self.presets[file]
-
-        return results
+        return {file: self.presets[file] for file in files if file in self.presets}

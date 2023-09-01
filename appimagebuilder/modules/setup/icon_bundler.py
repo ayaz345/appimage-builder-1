@@ -23,24 +23,27 @@ class IconBundler:
         self.app_dir = app_dir
         self.icon = icon
         if icon.endswith(".ico"):
-            logging.info("File .ico is not supported as app icon, searching for svg or png files: %s " % icon)
+            logging.info(
+                f"File .ico is not supported as app icon, searching for svg or png files: {icon} "
+            )
             self.icon = icon[:-4]
         elif icon.endswith(".png") or icon.endswith(".svg"):
-            logging.info("Don't use extension in app icon file name, cutting it down: %s " % icon )
+            logging.info(
+                f"Don't use extension in app icon file name, cutting it down: {icon} "
+            )
             self.icon = icon[:-4]
 
     def bundle_icon(self):
         source_icon_path = self._get_icon_path()
         if not source_icon_path:
-            raise IconBundler.Error("Unable to find any app icon named: %s" % self.icon)
+            raise IconBundler.Error(f"Unable to find any app icon named: {self.icon}")
 
         target_icon_path = os.path.join(
             self.app_dir, os.path.basename(source_icon_path)
         )
         try:
             logging.info(
-                "Setting AppDir: %s to %s"
-                % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir))
+                f"Setting AppDir: {source_icon_path} to {os.path.relpath(target_icon_path, self.app_dir)}"
             )
             shutil.copyfile(source_icon_path, target_icon_path)
             app_dir_icon_path = self.app_dir / ".DirIcon"
@@ -49,8 +52,7 @@ class IconBundler:
             os.symlink(os.path.basename(source_icon_path), app_dir_icon_path)
         except Exception:
             raise IconBundler.Error(
-                "Unable to copy icon from: %s to %s"
-                % (source_icon_path, target_icon_path)
+                f"Unable to copy icon from: {source_icon_path} to {target_icon_path}"
             )
 
     def _get_icon_path(self):
@@ -66,23 +68,20 @@ class IconBundler:
 
         refined_search_paths = []
         for path in search_paths:
-            refined_search_paths.append(path + "/icons")
-            refined_search_paths.append(path + "/pixmaps")
-
+            refined_search_paths.extend((f"{path}/icons", f"{path}/pixmaps"))
         for path in refined_search_paths:
-            path = self._search_icon(path)
-            if path:
+            if path := self._search_icon(path):
                 return path
 
         return None
 
     def _search_icon(self, search_path):
-        logging.info("Looking app icon at: %s" % search_path)
+        logging.info(f"Looking app icon at: {search_path}")
         path = None
         size = 0
 
-        svg_icon_name = "%s.svg" % self.icon
-        png_icon_name = "%s.png" % self.icon
+        svg_icon_name = f"{self.icon}.svg"
+        png_icon_name = f"{self.icon}.png"
 
         for root, dirs, files in os.walk(search_path):
             # prefer svg files over png
@@ -100,10 +99,9 @@ class IconBundler:
         return path
 
     def _extract_icon_size_from_path(self, path):
-        size_search = re.search(".*/(\d+)x\d+/.*", path, re.IGNORECASE)
-        if size_search:
-            return int(size_search.group(1))
+        if size_search := re.search(".*/(\d+)x\d+/.*", path, re.IGNORECASE):
+            return int(size_search[1])
         else:
-            logging.warning("Icon size can not be guessed from path: %s" % path)
+            logging.warning(f"Icon size can not be guessed from path: {path}")
 
         return 0

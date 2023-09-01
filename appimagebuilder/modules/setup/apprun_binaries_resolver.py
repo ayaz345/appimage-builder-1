@@ -46,10 +46,7 @@ class AppRunBinariesResolver:
     def resolve_executable(self, arch):
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        apprun_asset = "AppRun-%s-%s" % (
-            self.apprun_build_type,
-            arch,
-        )
+        apprun_asset = f"AppRun-{self.apprun_build_type}-{arch}"
         apprun_file = self.cache_dir / apprun_asset
         if not apprun_file.exists():
             self._download_release_asset(apprun_asset, apprun_file)
@@ -59,7 +56,7 @@ class AppRunBinariesResolver:
     def resolve_hooks_library(self, arch):
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        asset = "libapprun_hooks-%s-%s.so" % (self.apprun_build_type, arch)
+        asset = f"libapprun_hooks-{self.apprun_build_type}-{arch}.so"
         file = self.cache_dir / asset
         if not file.exists():
             self._download_release_asset(asset, file)
@@ -91,9 +88,6 @@ class AppRunBinariesResolver:
     def _download_release_asset(self, asset, path):
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        url = "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s" % (
-            self.apprun_version,
-            asset,
-        )
-        logging.info("Downloading: %s" % url)
+        url = f"https://github.com/AppImageCrafters/AppRun/releases/download/{self.apprun_version}/{asset}"
+        logging.info(f"Downloading: {url}")
         request.urlretrieve(url, path)

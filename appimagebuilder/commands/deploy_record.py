@@ -28,8 +28,7 @@ class WriteDeployRecordCommand(Command):
         path = self.context.app_dir / ".bundle.yml"
         with open(path, "w") as f:
             logging.info(
-                "Writing deploy record to: %s"
-                % os.path.relpath(path, self.context.app_dir)
+                f"Writing deploy record to: {os.path.relpath(path, self.context.app_dir)}"
             )
             yaml = YAML()
             yaml.dump(self.context.record, f)

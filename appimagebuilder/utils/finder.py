@@ -103,11 +103,7 @@ class Finder:
 
     @staticmethod
     def match_patterns(path, patterns):
-        for pattern in patterns:
-            if fnmatch.fnmatch(path, pattern):
-                return True
-
-        return False
+        return any(fnmatch.fnmatch(path, pattern) for pattern in patterns)
 
     def find_one(self, pattern="*", check_true: [] = None, check_false: [] = None):
         try:
@@ -125,8 +121,7 @@ class Finder:
         check_true_names = [item.__name__ for item in check_true]
         check_false_names = [item.__name__ for item in check_false]
         self.logger.debug(
-            "FIND %s %s %s"
-            % (pattern, " ".join(check_true_names), " ".join(check_false_names))
+            f'FIND {pattern} {" ".join(check_true_names)} {" ".join(check_false_names)}'
         )
 
         for path in self.base_path.rglob(pattern):
@@ -140,16 +135,15 @@ class Finder:
         if check_false is None:
             check_false = []
 
-        self.logger.debug("Inspecting: %s" % path)
+        self.logger.debug(f"Inspecting: {path}")
         for check_function in check_true:
             passed = self._run_check(check_function, path)
-            self.logger.debug("%s : %s" % (check_function, passed))
+            self.logger.debug(f"{check_function} : {passed}")
             if not passed:
                 return False
 
         for check_function in check_false:
-            passed = self._run_check(check_function, path)
-            if passed:
+            if passed := self._run_check(check_function, path):
                 return False
 
         return True
@@ -158,17 +152,13 @@ class Finder:
         key = (path.__str__(), check_function.__name__)
         if key in self.cache:
             return self.cache[key]
-        else:
-            passed = check_function(path)
-            self.cache[key] = passed
-            return passed
+        passed = check_function(path)
+        self.cache[key] = passed
+        return passed
 
     @staticmethod
     def list_does_not_contain_file(file_list: [pathlib.Path], file: pathlib.Path):
-        for item in file_list:
-            if item == file:
-                return False
-        return True
+        return file not in file_list
 
     def get_preserve_files(self, preserve_paths: [str]):
         _preserve_files = []

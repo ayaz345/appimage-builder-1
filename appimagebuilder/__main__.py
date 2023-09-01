@@ -53,7 +53,7 @@ def __main__():
 def _setup_logging_config(args):
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
-        logging.error("Invalid log level: %s" % args.loglevel)
+        logging.error(f"Invalid log level: {args.loglevel}")
 
     logging.basicConfig(level=numeric_level)
 

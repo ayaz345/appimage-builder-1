@@ -53,8 +53,7 @@ class Inspector:
                 except PatchElfError:
                     pass
 
-        bundle_needed = libs_needed - bundle_libs
-        return bundle_needed
+        return libs_needed - bundle_libs
 
     def get_bundle_runtime_needed_libs(self):
         analyser = AppRuntimeAnalyser(self.app_dir, "AppRun", "")

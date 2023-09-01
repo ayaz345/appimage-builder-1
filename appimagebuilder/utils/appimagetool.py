@@ -30,7 +30,7 @@ class AppImageToolCommand(Command):
         self.target_arch = None
 
     def run(self):
-        logging.info("Generating AppImage from %s" % self.app_dir)
+        logging.info(f"Generating AppImage from {self.app_dir}")
         command = self._generate_command()
 
         if self.target_arch:
@@ -56,8 +56,5 @@ class AppImageToolCommand(Command):
         if self.guess_update_information:
             command.extend(["--guess"])
 
-        # appstreamcli calls from
-        command.extend(["--no-appstream"])
-
-        command.extend([str(self.app_dir), str(self.target_file)])
+        command.extend(["--no-appstream", str(self.app_dir), str(self.target_file)])
         return command

@@ -40,13 +40,15 @@ class AppRun3QtSetup(AppRun3Helper):
                 self._write_qt_conf(qt_conf, path)
 
     def _find_exec_dirs(self):
-        exec_dirs = set([entry.path.parent for entry in self.context.app_dir.files.values() if entry.is_executable])
-
-        return exec_dirs
+        return {
+            entry.path.parent
+            for entry in self.context.app_dir.files.values()
+            if entry.is_executable
+        }
 
     def _write_qt6_conf(self, qt_conf: {str: str}, target_dir: Path):
         path = target_dir / "qt6.conf"
-        logging.info("Creating %s" % path.relative_to(self.context.app_dir.path))
+        logging.info(f"Creating {path.relative_to(self.context.app_dir.path)}")
         with path.open("w") as f:
             f.write("[Paths]\n")
             for k, v in qt_conf.items():
@@ -54,7 +56,7 @@ class AppRun3QtSetup(AppRun3Helper):
 
     def _write_qt_conf(self, qt_conf: {str: str}, target_dir: Path):
         path = target_dir / "qt.conf"
-        logging.info("Creating %s" % path.relative_to(self.context.app_dir.path))
+        logging.info(f"Creating {path.relative_to(self.context.app_dir.path)}")
         with path.open("w") as f:
             f.write("[Paths]\n")
             for k, v in qt_conf.items():
@@ -68,35 +70,32 @@ class AppRun3QtSetup(AppRun3Helper):
         return config
 
     def _locate_qt5_dirs(self):
-        libqt5core = self.context.app_dir.find_one(["*/libQt5Core.so.*"])
-        if libqt5core:
+        if libqt5core := self.context.app_dir.find_one(["*/libQt5Core.so.*"]):
             self._qt5_dirs["Libraries"] = libqt5core.path.parent
         else:
             # don't go any forward if libQt5Core is not found
             return
 
-        qtwebengine = self.context.app_dir.find_one(["*/QtWebEngineProcess"])
-        if qtwebengine:
+        if qtwebengine := self.context.app_dir.find_one(["*/QtWebEngineProcess"]):
             self._qt5_dirs["LibraryExecutables"] = qtwebengine.path.parent
 
-        qmake = self.context.app_dir.find_one(["*/qmake"])
-        if qmake:
+        if qmake := self.context.app_dir.find_one(["*/qmake"]):
             self._qt5_dirs["Binaries"] = qmake.path.parent
 
-        libqminimal = self.context.app_dir.find_one(["*/libqminimal.so"])
-        if libqminimal:
+        if libqminimal := self.context.app_dir.find_one(["*/libqminimal.so"]):
             self._qt5_dirs["Plugins"] = libqminimal.path.parent.parent
 
-        builtins_qmltypes = self.context.app_dir.find_one(["*/builtins.qmltypes"])
-        if builtins_qmltypes:
+        if builtins_qmltypes := self.context.app_dir.find_one(
+            ["*/builtins.qmltypes"]
+        ):
             self._qt5_dirs["Qml2Imports"] = builtins_qmltypes.path.parent
 
-        qtbase_translations = self.context.app_dir.find_one(["*/qt5/translations/*"])
-        if qtbase_translations:
+        if qtbase_translations := self.context.app_dir.find_one(
+            ["*/qt5/translations/*"]
+        ):
             self._qt5_dirs["Translations"] = qtbase_translations.path.parent
 
-        data = self.context.app_dir.find_one(["*/qt5/resources/*"])
-        if data:
+        if data := self.context.app_dir.find_one(["*/qt5/resources/*"]):
             self._qt5_dirs["Data"] = data.path.parent
 
     def _configure_qt6(self):
@@ -110,34 +109,31 @@ class AppRun3QtSetup(AppRun3Helper):
                 self._write_qt6_conf(qt_conf, path)
 
     def _locate_qt6_dirs(self):
-        libqt6core = self.context.app_dir.find_one(["*/libQt6Core.so.*"])
-        if libqt6core:
+        if libqt6core := self.context.app_dir.find_one(["*/libQt6Core.so.*"]):
             self._qt6_dirs["Libraries"] = libqt6core.path.parent
         else:
             # don't go any forward if libQt6Core is not found
             return
 
-        qtwebengine = self.context.app_dir.find_one(["*/QtWebEngineProcess"])
-        if qtwebengine:
+        if qtwebengine := self.context.app_dir.find_one(["*/QtWebEngineProcess"]):
             self._qt6_dirs["LibraryExecutables"] = qtwebengine.path.parent
 
-        qmake = self.context.app_dir.find_one(["*/qmake6"])
-        if qmake:
+        if qmake := self.context.app_dir.find_one(["*/qmake6"]):
             self._qt6_dirs["Binaries"] = qmake.path.parent
 
-        libqminimal = self.context.app_dir.find_one(["*/libqminimal.so"])
-        if libqminimal:
+        if libqminimal := self.context.app_dir.find_one(["*/libqminimal.so"]):
             self._qt6_dirs["Plugins"] = libqminimal.path.parent.parent
 
-        builtins_qmltypes = self.context.app_dir.find_one(["*/builtins.qmltypes"])
-        if builtins_qmltypes:
+        if builtins_qmltypes := self.context.app_dir.find_one(
+            ["*/builtins.qmltypes"]
+        ):
             self._qt6_dirs["QmlImports"] = builtins_qmltypes.path.parent
             self._qt6_dirs["Qml2Imports"] = builtins_qmltypes.path.parent
 
-        qtbase_translations = self.context.app_dir.find_one(["*/qt6/translations/*"])
-        if qtbase_translations:
+        if qtbase_translations := self.context.app_dir.find_one(
+            ["*/qt6/translations/*"]
+        ):
             self._qt6_dirs["Translations"] = qtbase_translations.path.parent
 
-        data = self.context.app_dir.find_one(["*/qt6/resources/*"])
-        if data:
+        if data := self.context.app_dir.find_one(["*/qt6/resources/*"]):
             self._qt6_dirs["Data"] = data.path.parent.parent

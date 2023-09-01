@@ -39,11 +39,7 @@ class BundleInfoGatherer:
     def gather_info(self, app_dir: pathlib.Path) -> BundleInfo:
         self._bundle_info = BundleInfo(app_dir=app_dir)
 
-        # search desktop entries
-        entries = self._search_desktop_entries(app_dir)
-
-        # select main desktop entry
-        if entries:
+        if entries := self._search_desktop_entries(app_dir):
             main_entry = self._select_main_entry(entries)
 
             # extract application information
@@ -71,10 +67,9 @@ class BundleInfoGatherer:
         if len(entries) == 1:
             return entries[0]
         else:
-            result = self._ui.ask_select(
+            return self._ui.ask_select(
                 "Please select the application desktop entry", entries
             )
-            return result
 
     def _confirm_application_information(self, bundle_info):
         app_info = bundle_info.app_info
@@ -112,8 +107,7 @@ class BundleInfoGatherer:
 
     def _confirm_application_exec(self, app_dir, preset):
         if preset:
-            options = self._resolve_exec_path(app_dir, preset)
-            if options:
+            if options := self._resolve_exec_path(app_dir, preset):
                 return self._ui.ask_select(
                     "Executable path:",
                     choices=options,
@@ -126,10 +120,8 @@ class BundleInfoGatherer:
 
     def _resolve_exec_path(self, app_dir: pathlib.Path, default_value):
         # search binary inside the AppDir
-        matches = list(app_dir.glob("**/" + default_value))
-        rel_paths = [str(match.relative_to(app_dir)) for match in matches]
-
-        return rel_paths
+        matches = list(app_dir.glob(f"**/{default_value}"))
+        return [str(match.relative_to(app_dir)) for match in matches]
 
     def _confirm_application_icon(self, preset):
         if not preset:

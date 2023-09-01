@@ -76,13 +76,9 @@ class PatchElf(Command):
         file = file.__str__()
         command = ["patchelf"]
         if run_path:
-            command.append("--set-rpath")
-            command.append(":".join(run_path))
-
+            command.extend(("--set-rpath", ":".join(run_path)))
         if interpreter:
-            command.append("--set-interpreter")
-            command.append(interpreter)
-
+            command.extend(("--set-interpreter", interpreter))
         command.append(file)
         self._run(command)
 

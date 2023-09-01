@@ -88,21 +88,15 @@ class Command:
         self.return_code = process.poll()
 
     def _process_stderr_lines(self, process):
-        stderr_line = process.stderr.readline()
-        while stderr_line:
+        while stderr_line := process.stderr.readline():
             stderr_line = stderr_line.decode("utf-8").strip()
             self.stderr.append(stderr_line)
             if self.log_stderr:
                 self.logger.warning(stderr_line)
 
-            stderr_line = process.stderr.readline()
-
     def _process_stdout_lines(self, process):
-        stdout_line = process.stdout.readline()
-        while stdout_line:
+        while stdout_line := process.stdout.readline():
             stdout_line = stdout_line.decode("utf-8").strip()
             self.stdout.append(stdout_line)
             if self.log_stdout:
                 self.logger.info(stdout_line)
-
-            stdout_line = process.stdout.readline()

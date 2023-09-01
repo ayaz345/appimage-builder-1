@@ -22,14 +22,13 @@ from ..environment import Environment
 
 class GdkPixbuf(BaseHelper):
     def configure(self, env: Environment, preserve_files):
-        loaders_dir_path = self.finder.find_one(
+        if loaders_dir_path := self.finder.find_one(
             "*/gdk-pixbuf-2.0/*/loaders", [Finder.is_dir]
-        )
-        if loaders_dir_path:
+        ):
             base_dir = os.path.dirname(loaders_dir_path)
             loaders_cache_path = os.path.join(base_dir, "loaders.cache")
 
-            logging.info("GDK loaders cache modules dir: %s" % loaders_cache_path)
+            logging.info(f"GDK loaders cache modules dir: {loaders_cache_path}")
             self._generate_loaders_cache(loaders_cache_path)
 
             env.set("GDK_PIXBUF_MODULEDIR", loaders_dir_path)
@@ -53,7 +52,7 @@ class GdkPixbuf(BaseHelper):
         with open(loaders_cache_path, "w") as f:
             f.write(query_output)
 
-        logging.info("GDK loaders cache wrote to: %s" % loaders_cache_path)
+        logging.info(f"GDK loaders cache wrote to: {loaders_cache_path}")
 
     @staticmethod
     def _find_gdk_pixbuf_query_loaders_bin():
@@ -83,7 +82,7 @@ class GdkPixbuf(BaseHelper):
             if line.startswith('"/'):
                 line = line.strip('"')
                 line = os.path.basename(line)
-                line = '"%s"' % line
+                line = f'"{line}"'
 
             output.append(line)
 

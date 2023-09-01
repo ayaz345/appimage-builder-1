@@ -62,17 +62,15 @@ class FileDeploy:
         deploy_path = os.path.normpath(self.app_dir + path)
 
         if not os.path.exists(deploy_path) and os.path.isfile(path):
-            self.logger.info("deploying %s" % path)
+            self.logger.info(f"deploying {path}")
             os.makedirs(os.path.dirname(deploy_path), exist_ok=True)
             shutil.copy2(path, deploy_path)
         # special files (devices, sockets, etc.) and directories get ignored here
 
     def _is_a_graphic_library(self, path):
-        for pattern in self.listings["graphics"]:
-            if fnmatch.fnmatch(path, pattern):
-                return True
-
-        return False
+        return any(
+            fnmatch.fnmatch(path, pattern) for pattern in self.listings["graphics"]
+        )
 
     def clean(self, paths: [str]):
         self.logger.info("Removing excluded files")

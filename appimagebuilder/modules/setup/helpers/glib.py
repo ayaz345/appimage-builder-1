@@ -24,18 +24,15 @@ class GLib(BaseHelper):
         self._configure_girepository(env)
 
     def _configure_gio_modules(self, env):
-        gio_modules_dir = self.finder.find_one("**/gio/modules")
-        if gio_modules_dir:
+        if gio_modules_dir := self.finder.find_one("**/gio/modules"):
             env.set("GIO_MODULE_DIR", str(gio_modules_dir))
 
     def _configure_girepository(self, env):
-        path = self.finder.find_one("*/girepository-1.0", [Finder.is_dir])
-        if path:
+        if path := self.finder.find_one("*/girepository-1.0", [Finder.is_dir]):
             env.set("GI_TYPELIB_PATH", path)
 
     def _configure_schemas(self, env):
-        path = self.finder.find_one("*/glib-2.0/schemas", [Finder.is_dir])
-        if path:
+        if path := self.finder.find_one("*/glib-2.0/schemas", [Finder.is_dir]):
             bin_path = shutil.which("glib-compile-schemas")
             if not bin_path:
                 raise RuntimeError("Missing 'glib-compile-schemas' executable")

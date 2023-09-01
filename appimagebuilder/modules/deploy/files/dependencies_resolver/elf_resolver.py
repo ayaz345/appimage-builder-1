@@ -61,10 +61,8 @@ class ElfResolver(BaseResolver):
         output = _proc.stdout.decode()
         needed_libraries = []
         for line in output.splitlines():
-            # match paths in lines
-            path_search = re.search(r"(/.*)\s?\(", line)
-            if path_search:
-                path = path_search.group(1)
+            if path_search := re.search(r"(/.*)\s?\(", line):
+                path = path_search[1]
                 needed_libraries.append(path.strip())
 
         return needed_libraries

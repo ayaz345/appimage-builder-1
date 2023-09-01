@@ -45,7 +45,7 @@ class AppImageCreator:
 
         fallback_file_name = os.path.join(
             os.getcwd(),
-            "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
+            f"{self.app_name}-{self.app_version}-{self.target_arch}.AppImage",
         )
         self.target_file = context.recipe.AppImage.file_name() or fallback_file_name
 
@@ -78,19 +78,18 @@ class AppImageCreator:
 
     def _download_runtime_if_required(self, runtime_path, runtime_url):
         if not os.path.exists(runtime_path):
-            logging.info("Downloading runtime: %s" % runtime_url)
+            logging.info(f"Downloading runtime: {runtime_url}")
             request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
         os.makedirs(self.context.build_dir, exist_ok=True)
-        runtime_path = self.context.build_dir / ("runtime-%s" % self.target_arch)
+        runtime_path = self.context.build_dir / f"runtime-{self.target_arch}"
 
         return str(runtime_path)
 
     def _get_runtime_url(self):
         runtime_url_template = "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
-        runtime_url = runtime_url_template % self.target_arch
-        return runtime_url
+        return runtime_url_template % self.target_arch
 
     def _assert_target_architecture(self):
         supported_architectures = ["i686", "aarch64", "armhf", "x86_64"]

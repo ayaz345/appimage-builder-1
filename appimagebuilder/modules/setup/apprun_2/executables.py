@@ -48,7 +48,7 @@ class BinaryExecutable(Executable):
         )
 
     def __str__(self) -> str:
-        return "BinaryExecutable(%s)" % self.path.__str__()
+        return f"BinaryExecutable({self.path.__str__()})"
 
 
 class InterpretedExecutable(Executable):
@@ -68,4 +68,4 @@ class InterpretedExecutable(Executable):
         )
 
     def __str__(self) -> str:
-        return "InterpretedExecutable(%s)" % self.path
+        return f"InterpretedExecutable({self.path})"

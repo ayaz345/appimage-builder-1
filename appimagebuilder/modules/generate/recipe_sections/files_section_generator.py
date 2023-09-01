@@ -60,10 +60,10 @@ class FilesSectionGenerator(PackageManagerSectionGenerator):
         ]
 
     def _is_file_blacklisted(self, file_name):
-        for pattern in self.exclusion_patterns:
-            if fnmatch.fnmatch(file_name, pattern):
-                return True
-        return False
+        return any(
+            fnmatch.fnmatch(file_name, pattern)
+            for pattern in self.exclusion_patterns
+        )
 
     def _exclude_resolvable_dependencies(self, _black_list_filter_result):
         resolver = Resolver()

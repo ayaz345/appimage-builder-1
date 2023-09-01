@@ -22,18 +22,15 @@ class AppRun3GLib(AppRun3Helper):
         self._configure_girepository()
 
     def _configure_gio_modules(self):
-        gio_module = self.context.app_dir.find_one(["**/gio/modules/*"])
-        if gio_module:
+        if gio_module := self.context.app_dir.find_one(["**/gio/modules/*"]):
             self.context.runtime_env["GIO_MODULE_DIR"] = str(gio_module.path.parent)
 
     def _configure_girepository(self):
-        path = self.context.app_dir.find_one(["*/girepository-1.0/*"])
-        if path:
+        if path := self.context.app_dir.find_one(["*/girepository-1.0/*"]):
             self.context.runtime_env["GI_TYPELIB_PATH"] = str(path.path.parent)
 
     def _configure_schemas(self):
-        schema_file = self.context.app_dir.find_one(["*/glib-2.0/schemas/*"])
-        if schema_file:
+        if schema_file := self.context.app_dir.find_one(["*/glib-2.0/schemas/*"]):
             bin_path = shutil.which("glib-compile-schemas")
             if not bin_path:
                 raise RuntimeError("Missing 'glib-compile-schemas' executable")

@@ -23,7 +23,7 @@ class DependenciesTest:
     def __init__(self, appdir, docker_image):
         self.appdir = appdir
         self.docker_image = docker_image
-        self.logger = logging.getLogger("Dependencies test on '%s'" % self.docker_image)
+        self.logger = logging.getLogger(f"Dependencies test on '{self.docker_image}'")
 
         self.tests_utils_dir = os.path.realpath(
             os.path.join(os.path.dirname(__file__), "utils")
@@ -37,7 +37,7 @@ class DependenciesTest:
 
         missing_libs = [lib for lib in need_libs if lib not in container_libs]
         for lib in missing_libs:
-            self.logger.error("Missing library '%s'" % lib)
+            self.logger.error(f"Missing library '{lib}'")
 
         if missing_libs:
             raise TestFailed("Some libraries cannot be located in the docker image.")
@@ -57,6 +57,4 @@ class DependenciesTest:
         )
 
         results = re.findall(".*\s=>\s/.*/(.*)", output.decode("utf-8"))
-        container_libs = set([result.strip() for result in results])
-
-        return container_libs
+        return {result.strip() for result in results}

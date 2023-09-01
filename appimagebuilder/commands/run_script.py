@@ -61,9 +61,7 @@ class RunScriptCommand(Command):
             run_env["SOURCE_DIR"] = str(self.context.recipe_path.parent.absolute())
             run_env["TARGET_APPDIR"] = str(self.context.app_dir.absolute())
 
-            # ensure commands get executed using the system shell (and environment)
-            appdir_env = os.getenv("APPDIR")
-            if appdir_env:
+            if appdir_env := os.getenv("APPDIR"):
                 # remove internal paths from lockup
                 path_env = os.getenv("PATH").split(":")
                 path_env = ":".join(
@@ -79,7 +77,7 @@ class RunScriptCommand(Command):
             _proc.communicate(self.script.encode())
 
             if _proc.returncode != 0:
-                raise RuntimeError("Script exited with code: %s" % _proc.returncode)
+                raise RuntimeError(f"Script exited with code: {_proc.returncode}")
 
             self._load_exported_env(exported_env)
 
@@ -88,6 +86,6 @@ class RunScriptCommand(Command):
         exported_env.seek(0, 0)
         for line in exported_env.readlines():
             line = line.decode().strip()
-            logging.info("Exporting env: %s" % line)
+            logging.info(f"Exporting env: {line}")
             key, val = line.split("=", 1)
             os.environ[key] = val

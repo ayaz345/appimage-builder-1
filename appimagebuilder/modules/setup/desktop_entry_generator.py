@@ -36,7 +36,7 @@ class DesktopEntryGenerator:
         self._save_app_dir_desktop_entry(app_info.id)
 
     def _match_desktop_entry(self, app_id, file_name):
-        return (app_id + ".desktop") in file_name
+        return f"{app_id}.desktop" in file_name
 
     def _add_appimage_name(self, name):
         idx = self._get_desktop_entry_header_index()
@@ -77,15 +77,15 @@ class DesktopEntryGenerator:
                     return os.path.join(apps_dir, file_name)
         except FileNotFoundError:
             raise DesktopEntryGenerator.Error(
-                "Unable to locate the application desktop entry: %s.desktop" % app_id
+                f"Unable to locate the application desktop entry: {app_id}.desktop"
             )
 
         raise DesktopEntryGenerator.Error(
-            "Unable to locate the application desktop entry: %s.desktop" % app_id
+            f"Unable to locate the application desktop entry: {app_id}.desktop"
         )
 
     def _save_app_dir_desktop_entry(self, app_id):
-        file_name = os.path.join(self.app_dir, app_id + ".desktop")
+        file_name = os.path.join(self.app_dir, f"{app_id}.desktop")
 
         with open(file_name, "w", encoding="utf-8") as f:
             f.writelines(self.contents)

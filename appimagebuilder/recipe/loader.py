@@ -62,9 +62,7 @@ class Loader:
                 for g in match:
                     value = os.environ.get(g, g)
                     if value == g:
-                        raise RecipeError(
-                            "Unable to resolve environment variable: %s" % g
-                        )
+                        raise RecipeError(f"Unable to resolve environment variable: {g}")
 
                     full_value = full_value.replace(f"${{{g}}}", value)
                 return full_value

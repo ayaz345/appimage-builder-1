@@ -48,34 +48,28 @@ class ExecutablesScanner:
         iterations = 0
         binary_found = False
         while iterations < 5 and not binary_found:
-            shebang = apprun_utils.read_shebang(path)
-            if shebang:
+            if shebang := apprun_utils.read_shebang(path):
                 try:
                     executable = InterpretedExecutable(path, shebang)
                     path = self._resolve_interpreter_path(shebang)
                 except MissingInterpreterError as err:
-                    logging.warning(
-                        err.__str__() + " while processing " + path.__str__()
-                    )
+                    logging.warning(f"{err.__str__()} while processing {path.__str__()}")
                     break
+            elif elf.has_magic_bytes(path) and elf.has_start_symbol(path):
+                arch = elf.get_arch(path)
+                executable = BinaryExecutable(path, arch)
+                binary_found = True
             else:
-                if elf.has_magic_bytes(path) and elf.has_start_symbol(path):
-                    arch = elf.get_arch(path)
-                    executable = BinaryExecutable(path, arch)
-                    binary_found = True
-                else:
-                    break
+                break
 
-            if len(results) > 0:
+            if results:
                 results[-1].interpreter = executable
 
             results.append(executable)
-            iterations = iterations + 1
+            iterations += 1
 
         if iterations >= 5:
-            raise RuntimeError(
-                "Loop found while resolving the interpreter of '%s'" % path
-            )
+            raise RuntimeError(f"Loop found while resolving the interpreter of '{path}'")
 
         return results
 
@@ -91,14 +85,12 @@ class ExecutablesScanner:
         )
         if not path:
             raise MissingInterpreterError(
-                "Required interpreter '%s' could not be found in the AppDir"
-                % interpreter_name
+                f"Required interpreter '{interpreter_name}' could not be found in the AppDir"
             )
 
-        path = os.path.relpath(path)
-        if not path:
+        if path := os.path.relpath(path):
+            return path
+        else:
             raise MissingInterpreterError(
-                "Required interpreter '%s' could not be found in the AppDir"
-                % interpreter_name
+                f"Required interpreter '{interpreter_name}' could not be found in the AppDir"
             )
-        return path

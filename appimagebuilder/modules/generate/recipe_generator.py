@@ -74,13 +74,11 @@ class RecipeGenerator:
     def _gather_runtime_dependencies(self, bundle_info: BundleInfo):
         """launch application and inspect runtime dependencies"""
 
-        runtime_dependencies = self._runtime_analyser.run_app_analysis(
+        return self._runtime_analyser.run_app_analysis(
             bundle_info.app_dir,
             bundle_info.app_info.exec,
             bundle_info.app_info.exec_args,
         )
-
-        return runtime_dependencies
 
     def _generate_v1_recipe(self, bundle_info, sections):
         """generate recipe using the application information and the package manager sections"""

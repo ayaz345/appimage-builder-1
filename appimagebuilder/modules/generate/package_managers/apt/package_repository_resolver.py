@@ -25,7 +25,7 @@ class PackageRepositoryResolver:
         apt_config_path = pathlib.Path("/etc/apt")
         for sources_list in apt_config_path.glob("**/*.list"):
             with open(sources_list) as list_file:
-                for line in list_file.readlines():
+                for line in list_file:
                     if line.startswith("deb "):
                         source_line = line.strip()
                         source_lines.append(source_line)

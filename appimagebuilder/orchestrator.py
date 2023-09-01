@@ -36,7 +36,7 @@ class Orchestrator:
         if recipe.version() == 1:
             return self._prepare_commands_for_recipe_v1(args, recipe)
 
-        raise RuntimeError("Unknown recipe version:  %s" % recipe.version())
+        raise RuntimeError(f"Unknown recipe version:  {recipe.version()}")
 
     def _prepare_commands_for_recipe_v1(self, args, recipe):
         context = self._extract_v1_recipe_context(args, recipe)
@@ -76,16 +76,13 @@ class Orchestrator:
                 context, recipe.AppDir.before_bundle, "before bundle script"
             )
             commands.append(command)
-        apt_section = recipe.AppDir.apt
-        if apt_section:
+        if apt_section := recipe.AppDir.apt:
             command = self._generate_apt_deploy_command(context, apt_section)
             commands.append(command)
-        pacman_section = recipe.AppDir.pacman
-        if pacman_section:
+        if pacman_section := recipe.AppDir.pacman:
             command = self._generate_pacman_deploy_command(context, pacman_section)
             commands.append(command)
-        files_section = recipe.AppDir.files
-        if files_section:
+        if files_section := recipe.AppDir.files:
             command = FileDeployCommand(
                 context,
                 files_section.include() or [],
@@ -109,12 +106,13 @@ class Orchestrator:
             commands.append(command)
 
         finder = Finder(context.app_dir)
-        commands.append(SetupSymlinksCommand(context, recipe, finder))
-
-        commands.append(SetupRuntimeCommand(context, finder))
-
-        commands.append(SetupAppInfoCommand(context))
-
+        commands.extend(
+            (
+                SetupSymlinksCommand(context, recipe, finder),
+                SetupRuntimeCommand(context, finder),
+                SetupAppInfoCommand(context),
+            )
+        )
         if recipe.AppDir.after_runtime:
             command = RunScriptCommand(
                 context, recipe.AppDir.after_runtime, "after runtime script"

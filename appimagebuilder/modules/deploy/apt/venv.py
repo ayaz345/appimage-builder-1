@@ -90,19 +90,19 @@ class Venv:
         }
 
         if user_options:
-            options.update(user_options)
+            options |= user_options
 
         # write apt.conf
         with open(self._apt_conf_path, "w") as f:
             for k, v in options.items():
-                if isinstance(v, str) or isinstance(v, pathlib.Path):
+                if isinstance(v, (str, pathlib.Path)):
                     f.write('%s "%s";\n' % (k, v))
                     continue
 
                 if isinstance(v, list):
                     f.write("%s {" % k)
                     for sv in v:
-                        f.write('"%s"; ' % sv)
+                        f.write(f'"{sv}"; ')
                     f.write("}\n")
                     continue
 
@@ -116,9 +116,9 @@ class Venv:
     def _write_keys(self, keys: [str]):
         for key_url in keys:
             key_url_hash = hashlib.md5(key_url.encode()).hexdigest()
-            key_path = os.path.join(self._apt_key_parts_path, "%s.asc" % key_url_hash)
+            key_path = os.path.join(self._apt_key_parts_path, f"{key_url_hash}.asc")
             if not os.path.exists(key_path):
-                self.logger.info("Download key file: %s" % key_url)
+                self.logger.info(f"Download key file: {key_url}")
                 request.urlretrieve(key_url, key_path)
 
     def _get_environment(self):
@@ -209,10 +209,10 @@ class Venv:
         return command
 
     def resolve_archive_paths(self, packages: [Package]):
-        paths = [
-            self._apt_archives_path / pkg.get_expected_file_name() for pkg in packages
+        return [
+            self._apt_archives_path / pkg.get_expected_file_name()
+            for pkg in packages
         ]
-        return paths
 
     def extract_package(self, package, target):
         # ensure target path existence

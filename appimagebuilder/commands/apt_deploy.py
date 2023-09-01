@@ -57,11 +57,10 @@ class AptDeployCommand(Command):
             "APT::Get::AllowUnauthenticated": self._allow_unauthenticated,
             "Acquire::AllowInsecureRepositories": self._allow_unauthenticated,
         }
-        apt_venv = Venv(
+        return Venv(
             str(Path(self.context.build_dir) / "apt"),
             self._sources,
             self._keys,
             self._architectures,
             apt_options,
         )
-        return apt_venv
